@@ -26,7 +26,7 @@ List of functions that need to be made:
  - [x] check validity of pointer pointing to allocated block of memory
  - [ ] testing
  
- # testing
+ ## testing
  - [ ] blocks of same size (8 - 24) in memory with size 50, 100 or 200 bytes
  - [ ] blocks of different size (8 - 24) in memory with size 50, 100 or 200 bytes
  - [ ] blocks of different size (500 - 5 000) in memory with size at least 1 000 bytes
