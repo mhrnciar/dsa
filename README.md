@@ -1,6 +1,6 @@
 ## dsa-projekt1
 
-This is a project for 2st semester class "Data Structures and Algorithms". Projects is about working with dynamic memory allocation.
+This is a project for 2nd semester class "Data Structures and Algorithms". Projects is about working with dynamic memory allocation.
 
 List of functions that need to be made:
 
