@@ -20,7 +20,7 @@ short get(unsigned int pos){
 }
 
 void flip(unsigned int pos){
-    set(pos, -get(pos));
+    set(pos, - get(pos));
 }
 
 void print(){
@@ -113,12 +113,96 @@ void *memory_alloc(unsigned int size){
 }
 
 int memory_free(void *valid_ptr){
-    if(valid_ptr - sizeof(short) < 0){
+    int head = valid_ptr - memory - sizeof(short);
+    int size = get(head);
+    int foot = head + size + sizeof(short);
+    
+    if(size < 0){
         printf("Blok nebol alokovaný\n");
         return 1;
     }
     
-    return 0;
+    flip(head);
+    flip(foot);
+    
+    if(sizeof(short) == 0){
+        set(sizeof(short), head);
+        set(valid_ptr - memory, -1);
+        set(valid_ptr - memory + sizeof(short), -1);
+        
+        return 0;
+    }
+    
+    int next_head = foot + sizeof(short);
+    int prev_foot = head - sizeof(short);
+    
+    if(next_head < get(0) && prev_foot > sizeof(short) && get(prev_foot) < 0 && get(next_head) < 0){
+        int prev_size = - get(prev_foot);
+        int next_size = - get(next_head);
+        int new_size = prev_size + size + next_size + 4 * sizeof(short);
+        int next_foot = next_head + next_size + sizeof(short);
+        int prev_head = prev_foot - prev_size - sizeof(short);
+        int next_next = get(next_head + 2 * sizeof(short));
+        
+        set(prev_head, - new_size);
+        set(next_foot, - new_size);
+        set(prev_head + 2 * sizeof(short), next_next);
+        
+        if (next_next > 0) {
+            set(next_next - sizeof(short), prev_head);
+        }
+        for(int i = prev_head + 3 * sizeof(short); i < next_foot - sizeof(short); i += 2) {
+            set(i, 0);
+        }
+        
+        return 0;
+    }
+    
+    else if(next_head < get(0) && get(next_head) < 0){
+        int next_size = - get(next_head);
+        int new_size = size + next_size + 2 * sizeof(short);
+        int next_foot = next_head + next_size + sizeof(short);
+        int next_prev = get(next_head + sizeof(short));
+        int next_next = get(next_head + 2 * sizeof(short));
+        
+        set(head + sizeof(short), next_prev);
+        set(head + 2 * sizeof(short), next_next);
+        
+        set(head, - new_size);
+        set(next_foot, - new_size);
+        
+        if (next_next > 0)
+            set(next_next + sizeof(short), head);
+            
+        if (next_prev > 0)
+            set(next_prev + 2 * sizeof(short), head);
+
+        if (get(sizeof(short)) == next_head)
+            set(sizeof(short), head);
+        
+        for(int i = head + 3 * sizeof(short); i < next_foot - sizeof(short); i += 2) {
+            set(i, 0);
+        }
+        
+        return 0;
+    }
+    
+    else if(prev_foot > sizeof(short) && get(prev_foot) < 0){
+        int prev_size = - get(prev_foot);
+        int new_size = size + prev_size + 2 * sizeof(short);
+        int prev_head = prev_foot - prev_size - sizeof(short);
+        
+        set(prev_head, - new_size);
+        set(head + size + sizeof(short), - new_size);
+        
+        for(int i = prev_head + 3 * sizeof(short); i < head + size; i += 2) {
+            set(i, 0);
+        }
+        
+        return 0;
+    }
+    
+    return 1;
 }
 
 int memory_check(void *ptr){
@@ -166,11 +250,13 @@ int main() {
     print();
     char *p = (char *) memory_alloc(20);
     print();
-    char *p2 = (char *) memory_alloc(30);
+    char *p2 = (char *) memory_alloc(20);
     print();
     char *p3 = (char *) memory_alloc(20);
     print();
-    char *p4 = (char *) memory_alloc(20);
+    
+    memory_free(p);
+    print();
     
     if(pointer)
         memset(pointer, 0, 10);
