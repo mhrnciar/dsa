@@ -16,7 +16,7 @@ List of functions that need to be made:
  - [ ] error handling
  
  **memory_free() (deallocation of already allocated block of memory):**
- - [ ] validate pointer
+ - [x] validate pointer
  - [x] free block of memory
  - [x] add neighboring blocks of free memory together
  - [ ] alter pointers pointing to previous and next blocks of free memory
