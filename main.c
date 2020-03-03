@@ -1,9 +1,6 @@
 //
-//  main.c
 //  Projekt 1
-//
-//  Created by Matej Hrnciar on 25/02/2020.
-//  Copyright © 2020 Matej Hrnciar. All rights reserved.
+//  Matej Hrnčiar
 //
 
 #include <stdio.h>
@@ -23,15 +20,15 @@ void flip(unsigned int pos){
     set(pos, - get(pos));
 }
 
-void print(){
-    for(int i = 0; i < 100; i += 2){
+void print(int size){
+    for(int i = 0; i < size; i += 2){
         printf("%2d: %d\n", i, get(i));
     }
     printf("\n");
 }
 
 void *memory_alloc(unsigned int size){
-    int diff, loc = -1, min = 1000;
+    int diff = get(0), min = get(0), loc = -1;
     unsigned int p_head = get(sizeof(short));
     int len = - get(p_head);
     int next = get(p_head + 2 * sizeof(short));
@@ -42,10 +39,14 @@ void *memory_alloc(unsigned int size){
     }
     
     while(1){
-        if((len - size) >= 0){
-            diff = len - (size + 2 * sizeof(short));
-            
+        if((len - size) == 0){
+            loc = p_head;
+            break;
+        }
+        else if(len - size >= 0 && len - size > 6 * sizeof(short)){
+            diff = len - size;
             if(diff < min){
+                min = diff;
                 loc = p_head;
             }
         }
@@ -55,9 +56,9 @@ void *memory_alloc(unsigned int size){
             len = - get(p_head);
             next = get(p_head + 2 * sizeof(short));
         }
-        
-        else
+        else{
             break;
+        }
     }
     
     if(loc < 0){
@@ -71,41 +72,50 @@ void *memory_alloc(unsigned int size){
     int prev = get(p_head + sizeof(short));
     next = get(p_head + 2 * sizeof(short));
     
-    int new_len = - (len - (size + 2 * sizeof(short)));
-    unsigned int head = p_head;
-    unsigned int foot = p_head + size + sizeof(short);
-    
-    if(foot < 98){
-        set(head, size);
-        set(foot, size);
-        set(foot + sizeof(short), new_len);
-        set(p_foot, new_len);
+    if(diff == 0){
+        flip(p_head);
+        flip(p_foot);
         
-        if(prev < 0)
-            set(sizeof(short), foot + sizeof(short));
-        else
-            set(prev + sizeof(short), foot + sizeof(short));
+        set(sizeof(short), next);
         
-        set(foot + 2 * sizeof(short), prev);
-        set(foot + 3 * sizeof(short), next); //treba ošetriť keď som na konci poľa
-        
-        if (next > 0) {
-            set(next + 2 * sizeof(short), foot + sizeof(short));
-        }
+        if(next > 0)
+            set(next + sizeof(short), prev);
     }
     
     else{
-        set(head, size);
-        set(foot, size);
+        int new_len = - (len - (size + 2 * sizeof(short)));
+        unsigned int head = p_head;
+        unsigned int foot = p_head + size + sizeof(short);
         
-        if(prev < 0)
-            set(sizeof(short), 0);
-        else
-            set(prev + sizeof(short), 0);
+        if(foot < get(0) - sizeof(short)){
+            set(head, size);
+            set(foot, size);
+            set(foot + sizeof(short), new_len);
+            set(p_foot, new_len);
+            
+            if(prev < 0)
+                set(sizeof(short), foot + sizeof(short));
+            else
+                set(prev + sizeof(short), foot + sizeof(short));
+            
+            if (next > 0) {
+                set(next + 2 * sizeof(short), foot + sizeof(short));
+            }
+        }
         
-        
-        if (next > 0) {
-            set(next + 2 * sizeof(short), foot + sizeof(short));
+        else{
+            set(head, size);
+            set(foot, size);
+            
+            if(prev < 0)
+                set(sizeof(short), 0);
+            else
+                set(prev + sizeof(short), 0);
+            
+            
+            if (next > 0) {
+                set(next + 2 * sizeof(short), foot + sizeof(short));
+            }
         }
     }
     
@@ -113,6 +123,10 @@ void *memory_alloc(unsigned int size){
 }
 
 int memory_free(void *valid_ptr){
+    if(valid_ptr == NULL){
+        return 1;
+    }
+    
     int head = valid_ptr - memory - sizeof(short);
     int size = get(head);
     int foot = head + size + sizeof(short);
@@ -202,6 +216,46 @@ int memory_free(void *valid_ptr){
         return 0;
     }
     
+    set(head + sizeof(short), -1);
+    set(head + 2 * sizeof(short), -1);
+    
+    if(head < get(sizeof(short))){
+        set(get(sizeof(short)) + sizeof(short), head);
+        set(head + sizeof(short), -1);
+        set(head + 2 * sizeof(short), get(sizeof(short)));
+        set(sizeof(short), head);
+    }
+    
+    else{
+        int akt = get(sizeof(short));
+        
+        while(1){
+            int pom = get(akt + sizeof(short));
+            
+            if(pom > 0){
+                if(pom < head){
+                    akt = pom;
+                    continue;
+                }
+                
+                else{
+                    set(akt + 2 * sizeof(short), head);
+                    set(head + sizeof(short), akt);
+                    set(head + 2 * sizeof(short), pom);
+                    set(pom + sizeof(short), head);
+                    break;
+                }
+            }
+            
+            else{
+                set(akt + sizeof(short), head);
+                set(head + sizeof(short), akt);
+                set(head + 2 * sizeof(short), -1);
+                break;
+            }
+        }
+    }
+    
     return 1;
 }
 
@@ -239,24 +293,30 @@ void memory_init(void *ptr, unsigned int size){
         set(i, 0);
     }
     
-    print();
+    print(size);
 }
 
 int main() {
     char region[100];
     memory_init(region, 100);
     
+    int size = sizeof(region) / sizeof(region[0]);
+    
     char *pointer = (char*) memory_alloc(10);
-    print();
+    print(size);
     char *p = (char *) memory_alloc(20);
-    print();
+    print(size);
     char *p2 = (char *) memory_alloc(20);
-    print();
+    print(size);
     char *p3 = (char *) memory_alloc(20);
-    print();
+    print(size);
     
     memory_free(p);
-    print();
+    print(size);
+    memory_free(p3);
+    print(size);
+    char *p4 = (char *) memory_alloc(20);
+    print(size);
     
     if(pointer)
         memset(pointer, 0, 10);
