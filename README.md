@@ -24,7 +24,7 @@ List of functions that need to be made:
  
  **memory_check() (validation of pointer pointing to allocated block of memory):**
  - [x] check validity of pointer pointing to allocated block of memory
- - [ ] testing
+ - [x] testing
  
  ## testing
  - [ ] blocks of same size (8 - 24) in memory with size 50, 100 or 200 bytes
