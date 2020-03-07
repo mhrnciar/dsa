@@ -290,7 +290,7 @@ int memory_free(void *valid_ptr){
             }
             
             else{
-                set(akt + sizeof(short), head);
+                set(akt + 2 * sizeof(short), head);
                 set(head + sizeof(short), akt);
                 set(head + 2 * sizeof(short), -1);
                 break;
@@ -344,34 +344,32 @@ void memory_init(void *ptr, unsigned int size){
 }
 
 int main() {
-    char region[100];
+    char region[500];
     int size = sizeof(region) / sizeof(region[0]);
     
-    memory_init(region, 100);
+    memory_init(region, 500);
     
-    char *pointer = (char*) memory_alloc(30);
+    char *pointer = (char*) memory_alloc(50);
     print(size);
-    char *pointer2 = (char*) memory_alloc(20);
+    char *pointer2 = (char*) memory_alloc(50);
     print(size);
-    char *pointer3 = (char*) memory_alloc(10);
+    char *pointer3 = (char*) memory_alloc(50);
     print(size);
-    char *pointer4 = (char*) memory_alloc(20);
+    char *pointer4 = (char*) memory_alloc(50);
+    print(size);
+    char *pointer5 = (char*) memory_alloc(50);
+    print(size);
+    char *pointer6 = (char*) memory_alloc(50);
     print(size);
     
     memory_check(pointer3);
     
-    memory_free(pointer2);
-    print(size);
     memory_free(pointer4);
     print(size);
     memory_free(pointer3);
     print(size);
-    
-    if(pointer)
-        memset(pointer, 0, 10);
-    
-    if(pointer)
-        memory_free(pointer);
+    memory_free(pointer);
+    print(size);
     
     return 0;
 }
