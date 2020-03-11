@@ -29,5 +29,5 @@ List of functions that need to be made:
  ## testing
  - [x] blocks of same size (8 - 24) in memory with size 50, 100 or 200 bytes
  - [x] blocks of different size (8 - 24) in memory with size 50, 100 or 200 bytes
- - [ ] blocks of different size (500 - 5 000) in memory with size at least 1 000 bytes
- - [ ] blocks of different size (8 - 50 000) in memory with size at least 1 000 bytes
+ - [x] blocks of different size (500 - 5 000) in memory with size at least 1 000 bytes
+ - [x] blocks of different size (8 - 50 000) in memory with size at least 1 000 bytes
