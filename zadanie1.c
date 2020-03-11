@@ -16,7 +16,8 @@ unsigned short get(unsigned short pos){
     return *(unsigned short *) (memory + pos);
 }
 
-void print(int size){
+void print(){
+    int size = get(0);
     for(int i = 0; i < size; i += 2){
         printf("%2d: %d\n", i, get(i));
     }
@@ -64,6 +65,7 @@ void *memory_alloc(int size){
             len = get(p_head);
             next = get(p_head + 2 * sizeof(short));
         }
+        
         else{
             break;
         }
@@ -374,33 +376,30 @@ void memory_init(void *ptr, unsigned int size){
         set(i, 0);
     }
     
-    print(size);
+    print();
 }
 
 int main() {
     char region[100];
-    int size = sizeof(region) / sizeof(region[0]);
-    
     memory_init(region, 100);
-    char *pointer1 = (char*) memory_alloc(19);
-    char *pointer2 = (char*) memory_alloc(20);
-    char *pointer3 = (char*) memory_alloc(20);
-    char *pointer4 = (char*) memory_alloc(20);
-    memory_check(pointer2);
+    
+    char *pointer1 = (char*) memory_alloc(10);
+    char *pointer2 = (char*) memory_alloc(10);
+    char *pointer3 = (char*) memory_alloc(10);
+    char *pointer4 = (char*) memory_alloc(10);
+    char *pointer5 = (char*) memory_alloc(10);
+    char *pointer6 = (char*) memory_alloc(22);
+    print();
     memory_free(pointer2);
-    memory_check(pointer2);
+    print();
     memory_free(pointer3);
-    print(size);
-    char *pointer5 = (char*) memory_alloc(20);
-    print(size);
-    char *pointer6 = (char*) memory_alloc(20);
-    print(size);
-    memory_free(pointer4);
-    memory_free(pointer1);
+    print();
+    memory_free(pointer6);
+    print();
     memory_free(pointer5);
-    char *pointer7 = (char*) memory_alloc(20);
-    char *pointer8 = (char*) memory_alloc(20);
-    print(size);
-
+    print();
+    memory_free(pointer4);
+    print();
+    
     return 0;
 }
