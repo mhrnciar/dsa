@@ -42,6 +42,8 @@ void *memory_alloc(int size){
         return NULL;
     }
     
+    size = size + (size % 2);
+    
     while(1){
         // Ak sa blok presne zmesti do volneho bloku
         if((len - size) == 0){
@@ -380,7 +382,7 @@ int main() {
     int size = sizeof(region) / sizeof(region[0]);
     
     memory_init(region, 100);
-    char *pointer1 = (char*) memory_alloc(20);
+    char *pointer1 = (char*) memory_alloc(19);
     char *pointer2 = (char*) memory_alloc(20);
     char *pointer3 = (char*) memory_alloc(20);
     char *pointer4 = (char*) memory_alloc(20);
@@ -400,25 +402,5 @@ int main() {
     char *pointer8 = (char*) memory_alloc(20);
     print(size);
 
-    /*
-    char *pointer1 = (char*) memory_alloc(24);
-    char *pointer2 = (char*) memory_alloc(10);
-    char *pointer3 = (char*) memory_alloc(8);
-    print(size);
-    memory_check(pointer2);
-    memory_free(pointer2);
-    memory_check(pointer2);
-    char *pointer4 = (char*) memory_alloc(12);
-    memory_free(pointer3);
-    print(size);
-    char *pointer5 = (char*) memory_alloc(22);
-    print(size);
-    memory_free(pointer4);
-    memory_free(pointer1);
-    memory_free(pointer5);
-    char *pointer7 = (char*) memory_alloc(10);
-    char *pointer8 = (char*) memory_alloc(20);
-    print(size);
-    */
     return 0;
 }
