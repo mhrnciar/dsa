@@ -23,4 +23,6 @@ struct rbNode{
 
 extern void pbvs_insert(int data);
 
+extern struct rbNode *pbvs_search(int key);
+
 extern void pbvs_inOrder(void);

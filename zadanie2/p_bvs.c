@@ -56,9 +56,8 @@ void pbvs_insert(int data){
             }
             
             else{
-                if(dir[ht-1] == 0){
+                if(dir[ht-1] == 0)
                     yPtr = stack[ht-1];
-                }
                 
                 else{
                     xPtr = stack[ht-1];
@@ -74,13 +73,11 @@ void pbvs_insert(int data){
                 xPtr->link[0] = yPtr->link[1];
                 yPtr->link[1] = xPtr;
                 
-                if(xPtr == root){
+                if(xPtr == root)
                     root = yPtr;
-                }
                 
-                else{
+                else
                     stack[ht-3]->link[dir[ht-3]] = yPtr;
-                }
                 
                 break;
             }
@@ -95,9 +92,8 @@ void pbvs_insert(int data){
             }
             
             else{
-                if(dir[ht-1] == 1){
+                if(dir[ht-1] == 1)
                     yPtr = stack[ht-1];
-                }
                 
                 else{
                     xPtr = stack[ht-1];
@@ -113,19 +109,40 @@ void pbvs_insert(int data){
                 xPtr->link[1] = yPtr->link[0];
                 yPtr->link[0] = xPtr;
                 
-                if(xPtr == root){
+                if(xPtr == root)
                     root = yPtr;
-                }
                 
-                else{
+                else
                     stack[ht-3]->link[dir[ht-3]] = yPtr;
-                }
                 
                 break;
             }
         }
     }
     root->color = BLACK;
+}
+
+static struct rbNode *pbvs_searchNode(struct rbNode *node, int key){
+    if(node == NULL){
+        printf("Hľadaný kľúč sa v strome nenachádza");
+        return NULL;
+    }
+    
+    if(key == node->data)
+        return node;
+    
+    else if (key < node->data)
+        return pbvs_searchNode(node->link[0], key);
+    
+    else if(key > node->data)
+        return pbvs_searchNode(node->link[1], key);
+    
+    return node;
+}
+
+struct rbNode *pbvs_search(int key){
+    struct rbNode *node = root;
+    return pbvs_searchNode(node, key);
 }
 
 static void pbvs_inOrderTraversal(struct rbNode *node){
