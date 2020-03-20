@@ -11,7 +11,9 @@
 #include "p_bvs.h"
 #include "p_hash.h"
 
-int main() {
+int main(){
+    phash_init();
+    
     NODE *root = NULL;
     root = mbvs_insert(root, 10);
     root = mbvs_insert(root, 20);
@@ -31,5 +33,12 @@ int main() {
     pbvs_insert(25);
     
     pbvs_inOrder();
+    
+    for(int i = 0; i < 100; i++){
+        mhash_insert(i*10);
+    }
+    
+    BLOCK *pointer = mhash_search(100);
+     
     return 0;
 }
