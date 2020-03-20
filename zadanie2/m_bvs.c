@@ -116,11 +116,11 @@ NODE *mbvs_search(NODE *node, int key){
     if(key == node->key)
         return node;
     
-    else if(key > node->key)
-        return mbvs_search(node->right, key);
-    
     else if (key < node->key)
         return mbvs_search(node->left, key);
+    
+    else if(key > node->key)
+        return mbvs_search(node->right, key);
     
     return node;
 }
