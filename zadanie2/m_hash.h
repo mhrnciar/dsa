@@ -15,6 +15,10 @@ typedef struct block{
     struct block *next;
 } BLOCK;
 
+extern void mhash_init(void);
+
 extern void mhash_insert(int data);
 
 extern BLOCK *mhash_search(int data);
+
+extern void mhash_display(void);
