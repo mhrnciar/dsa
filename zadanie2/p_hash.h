@@ -3,7 +3,7 @@
 //  Projekt 2
 //  Matej Hrnčiar
 //
-//  https://www.programiz.com/dsa/hash-table
+//  https://www.sanfoundry.com/c-program-implement-hash-tables/
 //
 
 #ifndef p_hash_h
@@ -11,11 +11,15 @@
 
 #endif /* p_hash_h */
 
-struct set{
-  int key;
-  int data;
+struct data{
+    int key;
+    int value;
 };
 
 extern void phash_init(void);
 
-extern void phash_insert(int key, int data);
+extern void phash_insert(int data);
+
+extern int phash_search(int data);
+
+extern void phash_display(void);

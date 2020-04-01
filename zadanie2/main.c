@@ -6,40 +6,82 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "m_bvs.h"
 #include "m_hash.h"
 #include "p_bvs.h"
 #include "p_hash.h"
 
 int main(){
+    clock_t time;
     mhash_init();
-    //phash_init();
-    
-    for(int i = 0; i < 500; i++){
-        mhash_insert(i*10);
-    }
-    mhash_display();
+    phash_init();
     
     NODE *root = NULL;
-    root = mbvs_insert(root, 10);
-    root = mbvs_insert(root, 20);
-    root = mbvs_insert(root, 30);
-    root = mbvs_insert(root, 40);
-    root = mbvs_insert(root, 50);
-    root = mbvs_insert(root, 25);
+    printf("MOJ AVL BVS\n");
+    time = clock();
+    for(int i = 0; i < 1000000; i++){
+        root = mbvs_insert(root, i);
+    }
+    time = clock() - time;
+    printf("Insert: %f\n", (float)time/CLOCKS_PER_SEC);
     
-    mbvs_preOrder(root);
-    printf("\n");
+    time = clock();
+    NODE *mbvspointer = mbvs_search(root, 0);
+    for(int i = 1; i < 1000000; i++){
+        mbvspointer = mbvs_search(root, i);
+    }
+    time = clock() - time;
+    printf("Search: %f\n\n", (float)time/CLOCKS_PER_SEC);
     
-    pbvs_insert(10);
-    pbvs_insert(20);
-    pbvs_insert(30);
-    pbvs_insert(40);
-    pbvs_insert(50);
-    pbvs_insert(25);
     
-    pbvs_inOrder();
+    printf("CERVENO-CIERNY BVS\n");
+    time = clock();
+    for(int i = 0; i < 1000000; i++){
+        pbvs_insert(i);
+    }
+    time = clock() - time;
+    printf("Insert: %f\n", (float)time/CLOCKS_PER_SEC);
     
+    time = clock();
+    for(int i = 0; i < 1000000; i++){
+        pbvs_search(i);
+    }
+    time = clock() - time;
+    printf("Search: %f\n\n", (float)time/CLOCKS_PER_SEC);
+    
+    
+    printf("MOJA HASHOVACIA TABULKA\n");
+    time = clock();
+    for(int i = 0; i < 1000000; i++){
+        mhash_insert(i);
+    }
+    time = clock() - time;
+    printf("Insert: %f\n", (float)time/CLOCKS_PER_SEC);
+    
+    time = clock();
+    BLOCK *mhashpointer = mhash_search(0);
+    for(int i = 1; i < 1000000; i++){
+        mhashpointer = mhash_search(i);
+    }
+    time = clock() - time;
+    printf("Search: %f\n\n", (float)time/CLOCKS_PER_SEC);
+    
+    
+    printf("PREBRANA HASHOVACIA TABULKA\n");
+    time = clock();
+    for(int i = 0; i < 1000000; i++){
+        phash_insert(i);
+    }
+    time = clock() - time;
+    printf("Insert: %f\n", (float)time/CLOCKS_PER_SEC);
+
+    time = clock();
+    for(int i = 0; i < 1000000; i++){
+        phash_search(i);
+    }
+    time = clock() - time;
+    printf("Search: %f\n", (float)time/CLOCKS_PER_SEC);
     
     return 0;
 }

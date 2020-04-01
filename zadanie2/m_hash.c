@@ -10,8 +10,7 @@
 
 static BLOCK *mhash_table;
 
-static int size = 100;
-static int capacity = 0;
+static int capacity = 1000;
 static int entries = 0;
 
 static int check_prime(int n){
@@ -39,32 +38,12 @@ static int get_prime(int n){
 }
 
 void mhash_init(){
-    capacity = get_prime(size);
+    capacity = get_prime(capacity);
     mhash_table = (BLOCK *) malloc(capacity * sizeof(BLOCK));
     for (int i = 0; i < capacity; i++){
         mhash_table[i].key = -1;
         mhash_table[i].data = -1;
         mhash_table[i].next = NULL;
-    }
-}
-
-void mhash_display(){
-    printf("%d\n%d\n", capacity, entries);
-    for (int i = 0; i < capacity; i++){
-        if(mhash_table[i].data != -1){
-            if(mhash_table[i].next != NULL) {
-                BLOCK *point = &mhash_table[i];
-                int pos = 1;
-                while(point != NULL){
-                    printf("[%d/%d]: %4d\n", point->key, pos, point->data);
-                    point = point->next;
-                    pos++;
-                }
-            }
-            
-            else
-                printf("[%d]: %4d\n", mhash_table[i].key, mhash_table[i].data);
-        }
     }
 }
 
@@ -87,9 +66,8 @@ static BLOCK *newBlock(int data, int key){
 }
 
 static void mhash_resize(){
-    size *= 2;
     int old_capacity = capacity;
-    capacity = get_prime(size);
+    capacity = get_prime(capacity*2);
     
     BLOCK *temp = (BLOCK *)malloc(capacity * sizeof(BLOCK));
     for (int i = 0; i < capacity; i++){
@@ -180,6 +158,26 @@ BLOCK *mhash_search(int data){
             point = point->next;
     }
     
-    printf("Hladany udaj sa nenasiel\n");
+    printf("Hladany udaj %d sa nenasiel\n", data);
     return NULL;
+}
+
+void mhash_display(){
+    printf("%d\n%d\n", capacity, entries);
+    for (int i = 0; i < capacity; i++){
+        if(mhash_table[i].data != -1){
+            if(mhash_table[i].next != NULL) {
+                BLOCK *point = &mhash_table[i];
+                int pos = 1;
+                while(point != NULL){
+                    printf("[%d/%d]: %4d\n", point->key, pos, point->data);
+                    point = point->next;
+                    pos++;
+                }
+            }
+            
+            else
+                printf("[%d]: %4d\n", mhash_table[i].key, mhash_table[i].data);
+        }
+    }
 }
