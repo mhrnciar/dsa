@@ -8,14 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+
 static int height(NODE *node){
     if (node == NULL)
         return 0;
     return node->height;
-}
-
-static int max(int a, int b){
-    return (a > b) ? a : b;
 }
 
 static int getBalance(NODE *node){
@@ -60,12 +58,12 @@ static NODE *rotateRight(NODE *y){
 }
 
 static NODE *mbvs_newNode(int key){
-    NODE *temp = (NODE *) malloc(sizeof(NODE));
+    NODE *new = (NODE *) malloc(sizeof(NODE));
     
-    temp->key = key;
-    temp->height = 1;
-    temp->left = temp->right = NULL;
-    return temp;
+    new->key = key;
+    new->height = 1;
+    new->left = new->right = NULL;
+    return new;
 }
 
 NODE *mbvs_insert(NODE *node, int key){
@@ -109,7 +107,7 @@ NODE *mbvs_insert(NODE *node, int key){
 
 NODE *mbvs_search(NODE *node, int key){
     if(node == NULL){
-        printf("Hľadaný kľúč sa v strome nenachádza");
+        printf("Kľúč %d sa v strome nenachádza\n", key);
         return NULL;
     }
     
