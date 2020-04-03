@@ -121,13 +121,13 @@ void mhash_insert(int data){
         BLOCK *point = &mhash_table[key];
         while(point->next != NULL){
             if(point->data == data){
-                printf("Vkladany udaj sa uz v poli nachadza\n");
+                //printf("Vkladany udaj sa uz v poli nachadza\n");
                 return;
             }
             point = point->next;
         }
         if(point->data == data){
-            printf("Vkladany udaj sa uz v poli nachadza\n");
+            //printf("Vkladany udaj sa uz v poli nachadza\n");
             return;
         }
         

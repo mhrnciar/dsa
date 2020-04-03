@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct rbNode *root = NULL;
+static struct rbNode *root = NULL;
 
 static struct rbNode *createNode(int data){
     struct rbNode *newnode = (struct rbNode *) malloc(sizeof(struct rbNode));
@@ -34,7 +34,7 @@ void pbvs_insert(int data){
     dir[ht++] = 0;
     while(ptr != NULL){
         if(ptr->data == data){
-            printf("Duplicates Not Allowed!!\n");
+            //printf("Duplicates Not Allowed!!\n");
             return;
         }
         
@@ -124,7 +124,7 @@ void pbvs_insert(int data){
 
 static struct rbNode *pbvs_searchNode(struct rbNode *node, int key){
     if(node == NULL){
-        printf("Hľadaný kľúč sa v strome nenachádza");
+        printf("Key %d has not been found\n", key);
         return NULL;
     }
     
