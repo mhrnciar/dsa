@@ -13,6 +13,7 @@ static BLOCK *mhash_table;
 static int capacity = 1000;
 static int entries = 0;
 
+// hladanie najblizsieho prvocisla ku kapacite pola
 static int check_prime(int n){
     int i;
     if(n == 1 || n == 0)
@@ -37,6 +38,7 @@ static int get_prime(int n){
     return n;
 }
 
+// inicializacia pola - alokuje sa dynamicke pole a vsetky hodnoty sa nastavia na -1 alebo NULL
 void mhash_init(){
     capacity = get_prime(capacity);
     mhash_table = (BLOCK *) malloc(capacity * sizeof(BLOCK));
@@ -47,6 +49,7 @@ void mhash_init(){
     }
 }
 
+// hesovacia funkcia je kombinaciou 32-bitovej mixovacej funkcie od Roberta Jenkina a modula prvocislom
 static int H(int key){
     key = ~key + (key << 15); // key = (key << 15) - key - 1;
     key = key ^ (key >> 12);
@@ -57,6 +60,7 @@ static int H(int key){
     return key % capacity;
 }
 
+// tvorba noveho prvku
 static BLOCK *newBlock(int data, int key){
     BLOCK *new = (BLOCK *) malloc(sizeof(BLOCK));
     new->data = data;
@@ -65,9 +69,16 @@ static BLOCK *newBlock(int data, int key){
     return new;
 }
 
+/*
+ * Operacia zvacsenia najprv zdvojnasobi kapacitu pola a vytvori nove dynamicke pole, do ktoreho sa
+ * vsetky prvky prekopiruju. Treba davat pozor na to, ze na niektorych miestach su spajane zoznamy, takze
+ * je potrebne ich prejst cele a taktiez kazdy prvok musi znova prejst hesovacou funkciou lebo po modulom
+ * novou kapacitou pola sa zmeni kluc daneho prvku. Nakoniec sa na globalny smernik priradi adresa noveho
+ * pola a stare sa uvolni.
+ */
 static void mhash_resize(){
     int old_capacity = capacity;
-    capacity = get_prime(capacity*2);
+    capacity = get_prime(capacity * 2);
     
     BLOCK *temp = (BLOCK *)malloc(capacity * sizeof(BLOCK));
     for (int i = 0; i < capacity; i++){
@@ -111,9 +122,15 @@ static void mhash_resize(){
             }
         }
     }
+    free(mhash_table);
     mhash_table = temp;
 }
 
+/*
+ * Najprv sa vytvori kluc pomocou hesovacej funkcie a potom sa na danom mieste ulozi prvok. Ak uz na
+ * danom mieste prvok je, vytvori sa spajany zoznam prvkov s rovnakymi klucmi. Ak pocet prvkov presiahne
+ * 50% celkovej kapacity pola, vykona sa operacia zvacsenia pola.
+ */
 void mhash_insert(int data){
     int key = H(data);
     
@@ -147,6 +164,10 @@ void mhash_insert(int data){
     }
 }
 
+/*
+ * Najprv sa vytvori kluc hladaneho prvku, a potom sa na danom mieste prejde cely spajany zoznam az kym
+ * sa dany prvok nenajde, inac vrati NULL.
+ */
 BLOCK *mhash_search(int data){
     int key = H(data);
     BLOCK *point = &mhash_table[key];
@@ -162,6 +183,7 @@ BLOCK *mhash_search(int data){
     return NULL;
 }
 
+// vypis pola
 void mhash_display(){
     printf("%d\n%d\n", capacity, entries);
     for (int i = 0; i < capacity; i++){

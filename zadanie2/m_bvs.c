@@ -10,18 +10,21 @@
 
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
+// vracia vysku daneho vrcholu
 static int height(NODE *node){
     if (node == NULL)
         return 0;
     return node->height;
 }
 
+// vracia rozdiel vysok medzi lavou a pravou vetvou vrchola
 static int getBalance(NODE *node){
     if(node == NULL)
         return 0;
     return height(node->left) - height(node->right);
 }
 
+// vypis stromu
 void mbvs_preOrder(NODE *node){
     if(node){
         printf("%d ", node->key);
@@ -31,6 +34,7 @@ void mbvs_preOrder(NODE *node){
     return;
 }
 
+// rotacia dolava a nastavenie novych vysok vrchola
 static NODE *rotateLeft(NODE *x){
     NODE *y = x->right;
     NODE *t = y->left;
@@ -44,6 +48,7 @@ static NODE *rotateLeft(NODE *x){
     return y;
 }
 
+// rotacia doprava a nastavenie novych vysok vrchola
 static NODE *rotateRight(NODE *y){
     NODE *x = y->left;
     NODE *t = x->right;
@@ -57,6 +62,7 @@ static NODE *rotateRight(NODE *y){
     return x;
 }
 
+// tvorba noveho vrchola
 static NODE *mbvs_newNode(int key){
     NODE *new = (NODE *) malloc(sizeof(NODE));
     
@@ -66,6 +72,12 @@ static NODE *mbvs_newNode(int key){
     return new;
 }
 
+/*
+ * Najprv sa rekurzivne prejde strom kym sa nenajde vhodne miesto pre novy vrchol. Potom sa nastavi nova vyska
+ * vrcholov a zistuje sa ci je strom vyvazeny. Ak nie je, tak dochadza k rotacii a to tak, ze ked je vpravo viac
+ * vrcholov, tak sa rotuje dolava, ak je ich menej, tak sa rotuje doprava. Zavisi aj od toho ci je vkladany kluc
+ * vacsi alebo mensi ako kluc vo vrchole - vtedy treba urobit este jednu rotaciu do opacneho smeru navyse.
+ */
 NODE *mbvs_insert(NODE *node, int key){
     if(node == NULL)
         return mbvs_newNode(key);
@@ -105,6 +117,10 @@ NODE *mbvs_insert(NODE *node, int key){
     return node;
 }
 
+/*
+ * Vyhladavanie prebieha taktiez rekurzivne, ak je hladany kluc mensi ako kluc vo vrchole, tak sa pokracuje
+ * lavou vetvou, ak je vacsi, tak pravou vetvou. Pokracuje sa az kym sa nenajde dany kluc alebo NULL.
+ */
 NODE *mbvs_search(NODE *node, int key){
     if(node == NULL){
         printf("Kľúč %d sa v strome nenachádza\n", key);

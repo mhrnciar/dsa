@@ -18,6 +18,7 @@ int main(){
     mhash_init();
     phash_init();
     
+    // TEST S 500 000 PRVKAMI NAHODNEJ HODNOTY
     srand((unsigned) time(NULL));
     
     for (int i = 0; i < 500000; i++) {
@@ -90,7 +91,7 @@ int main(){
     t = clock() - t;
     printf("Search: %f\n", (float)t/CLOCKS_PER_SEC);
     
-    /*
+    /* TEST S MILIONOM PRVKOV V POSTUPNOSTI *
     NODE *root = NULL;
     printf("MOJ AVL BVS\n");
     t = clock();
