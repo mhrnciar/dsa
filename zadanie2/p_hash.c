@@ -3,99 +3,65 @@
 //  Projekt 2
 //  Matej Hrnčiar
 //
-//  https://www.sanfoundry.com/c-program-implement-hash-tables/
+//  https://www.thecrazyprogrammer.com/2017/06/hashing.html
 //
 
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 #include "p_hash.h"
- 
-static struct data *array;
 
-static int capacity = 1000000;
-static int size = 0;
- 
-/* this function gives a unique hash code to the given key */
-static int hashcode(int key){
-    return (key % capacity);
-}
+static int *array;
+static int size = 500000;
+static int hFn;
 
-/* to check if given input (i.e n) is prime or not */
-static int if_prime(int n){
-    int i;
-    if ( n == 1  ||  n == 0){
-        return 0;
-    }
-    for (i = 2; i < n; i++){
-        if (n % i == 0){
-            return 0;
-        }
-    }
-    return 1;
-}
- 
-/* it returns prime number just greater than array capacity */
-static int get_prime(int n){
-    if (n % 2 == 0){
-        n++;
-    }
-    for (; !if_prime(n); n += 2);
- 
-    return n;
-}
- 
 void phash_init(){
-    int i;
-    capacity = get_prime(capacity);
-    
-    array = (struct data*) malloc(capacity * sizeof(struct data));
-    
-    for (i = 0; i < capacity; i++){
-        array[i].key = -1;
-        array[i].value = -1;
-    }
+    hFn = size;
+    array = (int *) malloc(size * sizeof(int));
+    for(int i = 0; i < size; i++)
+        array[i] = INT_MIN;
 }
- 
-/* to insert a key in the hash table */
-void phash_insert(int key){
-    int index = hashcode(key);
+
+void phash_insert(int data){
+    int pos = data % hFn;
+    int n = 0;
     
-    if (array[index].value == -1){
-        /*  key not present, insert it  */
-        array[index].key = key;
-        array[index].value = 1;
-        size++;
-    }
-    
-    else if(array[index].key == key){
-        /*  updating already existing key  */
-        printf("\n Key (%d) already present, hence updating its value \n", key);
-        array[index].value += 1;
+    while(array[pos]!= INT_MIN) {  // INT_MIN and INT_MAX indicates that cell is empty. So if cell is empty loop will break and goto bottom of the loop to insert element
+        if(array[pos]== INT_MAX)
+            break;
+        pos = (pos+1) % hFn;
+        n++;
+        
+        if(n == size)
+            break;      // If table is full we should break, if not check this, loop will go to infinite loop.
     }
     
-    else{
-        /*  key cannot be insert as the index is already containing some other key  */
-        printf("\n ELEMENT CANNOT BE INSERTED \n");
-    }
-}
- 
-/* to display all the elements of a hash table */
-void phash_display(){
-    int i;
-    for (i = 0; i < capacity; i++){
-        if (array[i].value == -1){
-            printf("\n Array[%d] has no elements \n", i);
-        }
-        else{
-            printf("\n array[%d] has elements -:\n key(%d) and value(%d) \t", i, array[i].key, array[i].value);
-        }
-    }
+    if(n==size)
+        printf("Hash table was full of elements\nNo Place to insert this element\n\n");
+    else
+        array[pos] = data;    //Inserting element
 }
 
 int phash_search(int key){
-    int index = hashcode(key);
-    if(array[index].value != -1 && array[index].value == key){
-        return 1;
+    int pos = key % hFn;
+    int n = 0;
+    
+    while(n++ != size){
+        if(array[pos] == key){
+            return pos;
+            break;
+        }
+        else if(array[pos] == INT_MAX || array[pos] != INT_MIN)
+            pos = (pos+1) % hFn;
     }
+    
+    if(--n == size)
+        return 0;
+    
     return 0;
+}
+
+void phash_display(){
+    for(int i = 0; i < size; i++)
+        printf("%d\t%d\n", i, array[i]);
 }
