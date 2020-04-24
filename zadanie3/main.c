@@ -88,7 +88,6 @@ void addToFront(FRONT **front, char **mapa, int a, int b){
 
 int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
     int a = 0, b = 0, pocetP = 0, pocetD = 0;;
-    int *returnPole = NULL;
     char navstivene[n][m];
     FRONT *front = NULL, *temp = NULL;
     
@@ -340,34 +339,35 @@ int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
             }
             else if(b == 0){
                 // lava hrana - mozem ist doprava, hore alebo dole
-                if(navstivene[a][b+1] == '0')
-                    addToFront(&front, mapa, a, b+1);
                 if(navstivene[a+1][b] == '0')
                     addToFront(&front, mapa, a+1, b);
                 if(navstivene[a-1][b] == '0')
                     addToFront(&front, mapa, a-1, b);
+                if(navstivene[a][b+1] == '0')
+                    addToFront(&front, mapa, a, b+1);
             }
             else if(b == (m-1)){
                 // prava hrana - mozem ist dolava, hore alebo dole
-                if(navstivene[a][b-1] == '0')
-                    addToFront(&front, mapa, a, b-1);
                 if(navstivene[a+1][b] == '0')
                     addToFront(&front, mapa, a+1, b);
                 if(navstivene[a-1][b] == '0')
                     addToFront(&front, mapa, a-1, b);
+                if(navstivene[a][b-1] == '0')
+                    addToFront(&front, mapa, a, b-1);
             }
             else{
                 // uprostred - mozem ist do vsetkych styroch smerov
+                if(navstivene[a+1][b] == '0')
+                    addToFront(&front, mapa, a+1, b);
+                if(navstivene[a-1][b] == '0')
+                    addToFront(&front, mapa, a-1, b);
                 if(navstivene[a][b+1] == '0')
                     addToFront(&front, mapa, a, b+1);
                 if(navstivene[a][b-1] == '0')
                     addToFront(&front, mapa, a, b-1);
-                if(navstivene[a+1][b] == '0')
-                    addToFront(&front, mapa, a+1, b);
-                if(navstivene[a-1][b] == '0')
-                    addToFront(&front, mapa, a-1, b);
             }
             
+            // Pociatocne policko vynecham z fronty a pokracujem dalej
             temp = front;
             if(front != NULL){
                 front = front->next;
@@ -460,7 +460,7 @@ int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
         }
     }
     
-    returnPole = malloc(2 * (*dlzka_cesty) * sizeof(int));
+    int *returnPole = malloc(2 * (*dlzka_cesty) * sizeof(int));
     
     int j = 0;
     for(int i = 0; i < 4; i++){
