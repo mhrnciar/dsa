@@ -86,7 +86,7 @@ void addToFront(FRONT **front, char **navstivene, int a, int b){
      * ta, ktora bola prave vytvorena a podla toho sa bud predosla cesta ponecha alebo vymeni za kratsiu.
      */
     while(akt->next != NULL){
-        if(akt->next->cesta->a == a && akt->next->cesta->b == b){
+        if(strcmp(akt->next->mapa->nazov, new->mapa->nazov) == 0 && akt->next->cesta->a == a && akt->next->cesta->b == b){
             if(akt->next->len > new->len){
                 akt->next = akt->next->next;
                 break;
@@ -99,8 +99,8 @@ void addToFront(FRONT **front, char **navstivene, int a, int b){
     
     akt = (*front);
     
-    while (akt->next != NULL) {
-        if (new->len < akt->next->len) {
+    while(akt->next != NULL){
+        if(new->len < akt->next->len){
             break;
         }
         akt = akt->next;
@@ -125,6 +125,7 @@ void dijkstra(int n, int m, int pocetP){
     front = malloc(sizeof(FRONT));
     front->mapa = malloc(sizeof(MAPY));
     front->mapa->mapa = mapy[0].mapa;
+    front->mapa->nazov = mapy[1].nazov;
     front->cesta = (CESTA *) malloc(sizeof(CESTA));
     front->cesta->a = a;
     front->cesta->b = b;
@@ -140,6 +141,12 @@ void dijkstra(int n, int m, int pocetP){
         for(int i = 0; i < n; i++){
             for(int j = 0; j < m; j++){
                 navstivene[i][j] = front->mapa->mapa[i][j];
+            }
+        }
+        
+        if(pocetP == 3){
+            for(int i = 0; i < 3; i++){
+                iden3[i] = front->mapa->nazov[i];
             }
         }
         a = front->cesta->a;
@@ -223,6 +230,9 @@ void dijkstra(int n, int m, int pocetP){
                     front = front->next;
                     free(temp);
                 }
+                if(front == NULL){
+                    return;
+                }
                 iden3[0] = 'p';
                 for(int i = 1; i < 8; i++){
                     memcpy(string, iden3, pocetP);
@@ -246,6 +256,9 @@ void dijkstra(int n, int m, int pocetP){
                     front = front->next;
                     free(temp);
                 }
+                if(front == NULL){
+                    return;
+                }
                 iden3[1] = 'p';
                 for(int i = 1; i < 8; i++){
                     memcpy(string, iden3, pocetP);
@@ -268,6 +281,9 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
+                }
+                if(front == NULL){
+                    return;
                 }
                 iden3[2] = 'p';
                 for(int i = 1; i < 8; i++){
