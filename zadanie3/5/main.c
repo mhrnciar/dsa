@@ -18,31 +18,68 @@ typedef struct cesta{
 
 typedef struct front{
     int len;
+    int mrtvyDrak;
+    int pocetP;
     struct front *next;
     MAPY *mapa;
     CESTA *cesta;
 } FRONT;
 
-CESTA *cesty;
+CESTA *cesta = NULL;
 MAPY *mapy;
 
-void addToFront(FRONT **front, char **mapa, int a, int b){
+static int N;
+static int M;
+
+char **setmapa(char mapa[N][M]){
+    char **pom = (char **) malloc(N * sizeof(char *));
+    for(int i = 0; i < N; i++){
+        *pom = (char *) malloc(M * sizeof(char));
+    }
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < M; j++){
+            pom[i] = strdup(mapa[i]);
+        }
+    }
+    return pom;
+}
+
+void ulozCestu(FRONT *front){
+    if(cesta == NULL){
+        cesta = malloc(sizeof(CESTA));
+        cesta = front->cesta;
+        cesta->len = front->len;
+    }
+    else{
+        if(front->len < cesta->len){
+            cesta = front->cesta;
+            cesta->len = front->len;
+        }
+    }
+}
+
+void addToFront(FRONT **front, char **navstivene, int a, int b){
     FRONT *akt = *front, *new = NULL;
     int move;
     
-    if(mapa[a][b] == 'N')
+    if(navstivene[a][b] == 'N')
         return;
-    else if(mapa[a][b] == 'H')
+    else if(navstivene[a][b] == 'H')
         move = 2;
     else
         move = 1;
     
     new = (FRONT *) malloc(sizeof(FRONT));
+    new->mapa = malloc(sizeof(MAPY));
+    new->mapa->mapa = navstivene;
+    new->mapa->nazov = akt->mapa->nazov;
     new->cesta = (CESTA *) malloc(sizeof(CESTA));
     new->cesta->a = a;
     new->cesta->b = b;
     new->cesta->prev = (*front)->cesta;
     new->len = (*front)->len + move;
+    new->mrtvyDrak = (*front)->mrtvyDrak;
+    new->pocetP = (*front)->pocetP;
     
     /*
      * Prejde sa front a zisti sa, ci do daneho bodu uz nevedie cesta. Ak ano, zisti sa ci je kratsia ako
@@ -74,8 +111,8 @@ void addToFront(FRONT **front, char **mapa, int a, int b){
 }
 
 void dijkstra(int n, int m, int pocetP){
-    char navstivene[n][m];
-    int a = 0, b = 0, pomPocet = 0, poloha = 0;
+    char navstivene[n][m], iden3[3], iden4[4], iden5[5], *string;
+    int a = 0, b = 0;
     FRONT *front = NULL, *temp = NULL;
     
     for(int i = 0; i < n; i++){
@@ -86,28 +123,32 @@ void dijkstra(int n, int m, int pocetP){
     
     front = NULL;
     front = malloc(sizeof(FRONT));
+    front->mapa = malloc(sizeof(MAPY));
+    front->mapa->mapa = mapy[0].mapa;
     front->cesta = (CESTA *) malloc(sizeof(CESTA));
     front->cesta->a = a;
     front->cesta->b = b;
     front->cesta->prev = NULL;
-    front->mapa->mapa = mapy[0].mapa;
     front->len = 0;
     front->next = NULL;
+    front->mrtvyDrak = 0;
+    front->pocetP = pocetP;
     
-    cesty = malloc(32 * sizeof(CESTA));
-    for(int i = 0; i < 32; i++){
-        cesty[i].len = -1;
-    }
-    pomPocet = pocetP;
+    string = malloc(pocetP * sizeof(char));
     
     while(front != NULL){
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < m; j++){
+                navstivene[i][j] = front->mapa->mapa[i][j];
+            }
+        }
         a = front->cesta->a;
         b = front->cesta->b;
-        navstivene[a][b] = '1';
+        navstivene[a][b] = '0';
         
         if((pocetP == 0) && (mapy[0].mapa[a][b] == 'D')){
-            cesty[0] = *front->cesta;
-            cesty[0].len = front->len;
+            ulozCestu(front);
+            free(front);
             return;
         }
         else if(pocetP == 1){
@@ -115,13 +156,13 @@ void dijkstra(int n, int m, int pocetP){
                 front->mapa->mapa = mapy[1].mapa;
                 for(int i = 0; i < n; i++){
                     for(int j = 0; j < m; j++){
-                        navstivene[i][j] = '0';
+                        navstivene[i][j] = front->mapa->mapa[i][j];
                     }
                 }
             }
             else if(front->mapa->mapa[a][b] == '1'){
-                cesty[0] = *front->cesta;
-                cesty[0].len = front->len;
+                ulozCestu(front);
+                free(front);
                 return;
             }
         }
@@ -131,14 +172,12 @@ void dijkstra(int n, int m, int pocetP){
                 front->mapa->mapa = mapy[1].mapa;
             }
             else if(front->mapa->mapa[a][b] == '1'){
-                pomPocet--;
-                if(pomPocet == 0){
-                    while(cesty[poloha].len != -1){
-                        poloha++;
-                    }
-                    cesty[poloha] = *front->cesta;
-                    cesty[poloha].len = front->len;
-                    return;
+                front->pocetP--;
+                if(front->pocetP == 0){
+                    ulozCestu(front);
+                    temp = front;
+                    front = front->next;
+                    free(temp);
                 }
                 front->mapa->mapa = mapy[2].mapa;
                 for(int i = 0; i < n; i++){
@@ -148,14 +187,12 @@ void dijkstra(int n, int m, int pocetP){
                 }
             }
             else if(front->mapa->mapa[a][b] == '2'){
-                pomPocet--;
-                if(pomPocet == 0){
-                    while(cesty[poloha].len != -1){
-                        poloha++;
-                    }
-                    cesty[poloha] = *front->cesta;
-                    cesty[poloha].len = front->len;
-                    return;
+                front->pocetP--;
+                if(front->pocetP == 0){
+                    ulozCestu(front);
+                    temp = front;
+                    front = front->next;
+                    free(temp);
                 }
                 front->mapa->mapa = mapy[3].mapa;
                 for(int i = 0; i < n; i++){
@@ -167,17 +204,97 @@ void dijkstra(int n, int m, int pocetP){
         }
         else if(pocetP == 3){
             if(front->mapa->mapa[a][b] == 'D'){
+                front->mapa->nazov = mapy[1].nazov;
                 front->mapa->mapa = mapy[1].mapa;
+                iden3[0] = 'n'; iden3[1] = 'n'; iden3[2] = 'n';
+                front->mrtvyDrak = 1;
+                front->next = NULL;
+                for(int i = 0; i < n; i++){
+                    for(int j = 0; j < m; j++){
+                        navstivene[i][j] = front->mapa->mapa[i][j];
+                    }
+                }
+            }
+            else if(front->mrtvyDrak == 1 && front->mapa->mapa[a][b] == '1'){
+                front->pocetP--;
+                if(front->pocetP == 0){
+                    ulozCestu(front);
+                    temp = front;
+                    front = front->next;
+                    free(temp);
+                }
+                iden3[0] = 'p';
+                for(int i = 1; i < 8; i++){
+                    memcpy(string, iden3, pocetP);
+                    if(strcmp(mapy[i].nazov, string) == 0){
+                        front->mapa->mapa = mapy[i].mapa;
+                        front->mapa->nazov = mapy[i].nazov;
+                        break;
+                    }
+                }
+                for(int i = 0; i < n; i++){
+                    for(int j = 0; j < m; j++){
+                        navstivene[i][j] = front->mapa->mapa[i][j];
+                    }
+                }
+            }
+            else if(front->mrtvyDrak == 1 && front->mapa->mapa[a][b] == '2'){
+                front->pocetP--;
+                if(front->pocetP == 0){
+                    ulozCestu(front);
+                    temp = front;
+                    front = front->next;
+                    free(temp);
+                }
+                iden3[1] = 'p';
+                for(int i = 1; i < 8; i++){
+                    memcpy(string, iden3, pocetP);
+                    if(strcmp(mapy[i].nazov, string) == 0){
+                        front->mapa->mapa = mapy[i].mapa;
+                        front->mapa->nazov = mapy[i].nazov;
+                        break;
+                    }
+                }
+                for(int i = 0; i < n; i++){
+                    for(int j = 0; j < m; j++){
+                        navstivene[i][j] = front->mapa->mapa[i][j];
+                    }
+                }
+            }
+            else if(front->mrtvyDrak == 1 && front->mapa->mapa[a][b] == '3'){
+                front->pocetP--;
+                if(front->pocetP == 0){
+                    ulozCestu(front);
+                    temp = front;
+                    front = front->next;
+                    free(temp);
+                }
+                iden3[2] = 'p';
+                for(int i = 1; i < 8; i++){
+                    memcpy(string, iden3, pocetP);
+                    if(strcmp(mapy[i].nazov, string) == 0){
+                        front->mapa->mapa = mapy[i].mapa;
+                        front->mapa->nazov = mapy[i].nazov;
+                        break;
+                    }
+                }
+                for(int i = 0; i < n; i++){
+                    for(int j = 0; j < m; j++){
+                        navstivene[i][j] = front->mapa->mapa[i][j];
+                    }
+                }
             }
         }
         else if(pocetP == 4){
             if(front->mapa->mapa[a][b] == 'D'){
                 front->mapa->mapa = mapy[1].mapa;
+                iden4[0] = 'n'; iden4[1] = 'n'; iden4[2] = 'n'; iden4[3] = 'n';
             }
         }
         else if(pocetP == 5){
             if(front->mapa->mapa[a][b] == 'D'){
                 front->mapa->mapa = mapy[1].mapa;
+                iden5[0] = 'n'; iden5[1] = 'n'; iden5[2] = 'n'; iden5[3] = 'n'; iden5[4] = 'n';
             }
         }
         
@@ -189,78 +306,78 @@ void dijkstra(int n, int m, int pocetP){
          */
         if(a == 0){
             // horna hrana - vzdy mozem prehladavat nizsi rad
-            if(navstivene[a+1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a+1, b);
+            if(navstivene[a+1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a+1, b);
             
             if(b == 0){
                 // lavy horny roh - mozem ist iba doprava
-                if(navstivene[a][b+1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b+1);
+                if(navstivene[a][b+1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b+1);
             }
             else if(b == (m-1)){
                 // pravy horny roh - mozem ist iba dolava
-                if(navstivene[a][b-1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b-1);
+                if(navstivene[a][b-1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b-1);
             }
             else{
                 // zvysok hornej hrany - mozem ist doparava aj dolava
-                if(navstivene[a][b+1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b+1);
-                if(navstivene[a][b-1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b-1);
+                if(navstivene[a][b+1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b+1);
+                if(navstivene[a][b-1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b-1);
             }
         }
         else if(a == (n-1)){
             // dolna hrana - vzdy mozem prehladavat vyssi rad
-            if(navstivene[a-1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a-1, b);
+            if(navstivene[a-1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a-1, b);
             
             if(b == 0){
                 // lavy dolny roh - mozem ist iba doprava
-                if(navstivene[a][b+1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b+1);
+                if(navstivene[a][b+1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b+1);
             }
             else if(b == (m-1)){
                 // pravy dolny roh - mozem ist iba dolava
-                if(navstivene[a][b-1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b-1);
+                if(navstivene[a][b-1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b-1);
             }
             else{
                 // zvysok dolnej hrany - mozem ist doprava aj dolava
-                if(navstivene[a][b+1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b+1);
-                if(navstivene[a][b-1] == '0')
-                    addToFront(&front, front->mapa->mapa, a, b-1);
+                if(navstivene[a][b+1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b+1);
+                if(navstivene[a][b-1] != '0')
+                    addToFront(&front, setmapa(navstivene), a, b-1);
             }
         }
         else if(b == 0){
             // lava hrana - mozem ist doprava, hore alebo dole
-            if(navstivene[a+1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a+1, b);
-            if(navstivene[a-1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a-1, b);
-            if(navstivene[a][b+1] == '0')
-                addToFront(&front, front->mapa->mapa, a, b+1);
+            if(navstivene[a+1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a+1, b);
+            if(navstivene[a-1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a-1, b);
+            if(navstivene[a][b+1] != '0')
+                addToFront(&front, setmapa(navstivene), a, b+1);
         }
         else if(b == (m-1)){
             // prava hrana - mozem ist dolava, hore alebo dole
-            if(navstivene[a+1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a+1, b);
-            if(navstivene[a-1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a-1, b);
-            if(navstivene[a][b-1] == '0')
-                addToFront(&front, front->mapa->mapa, a, b-1);
+            if(navstivene[a+1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a+1, b);
+            if(navstivene[a-1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a-1, b);
+            if(navstivene[a][b-1] != '0')
+                addToFront(&front, setmapa(navstivene), a, b-1);
         }
         else{
             // uprostred - mozem ist do vsetkych styroch smerov
-            if(navstivene[a+1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a+1, b);
-            if(navstivene[a-1][b] == '0')
-                addToFront(&front, front->mapa->mapa, a-1, b);
-            if(navstivene[a][b+1] == '0')
-                addToFront(&front, front->mapa->mapa, a, b+1);
-            if(navstivene[a][b-1] == '0')
-                addToFront(&front, front->mapa->mapa, a, b-1);
+            if(navstivene[a+1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a+1, b);
+            if(navstivene[a-1][b] != '0')
+                addToFront(&front, setmapa(navstivene), a-1, b);
+            if(navstivene[a][b+1] != '0')
+                addToFront(&front, setmapa(navstivene), a, b+1);
+            if(navstivene[a][b-1] != '0')
+                addToFront(&front, setmapa(navstivene), a, b-1);
         }
         
         // Pociatocne policko vynecham z fronty a pokracujem dalej
@@ -275,6 +392,8 @@ void dijkstra(int n, int m, int pocetP){
 int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
     int pocetP = 0;
     mapy = createMaps(mapa, n, m);
+    N = n;
+    M = m;
     
     if(mapy == NULL){
         return NULL;
@@ -290,13 +409,38 @@ int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
     
     dijkstra(n, m, pocetP);
     
-    int *p = NULL;
-    return p;
+    CESTA *akt = cesta;
+    while(akt != NULL){
+        (*dlzka_cesty)++;
+        akt = akt->prev;
+    }
+    
+    int *returnPole = malloc(2 * (*dlzka_cesty) * sizeof(int));
+    int j = 0, koniec = 0;
+    akt = cesta;
+    
+    while(akt != NULL){
+        returnPole[j*2] = akt->a;
+        returnPole[j*2+1] = akt->b;
+        j++;
+        akt = akt->prev;
+    }
+    
+    int temp, zaciatok = j * 2 - 1;
+    while(koniec != zaciatok + 1){
+        temp = returnPole[koniec];
+        returnPole[koniec] = returnPole[zaciatok];
+        returnPole[zaciatok] = temp;
+        koniec++;
+        zaciatok--;
+    }
+    
+    return returnPole;
 }
 
 int main() {
     char **mapa = NULL;
-    int i, test, dlzka_cesty, cas, *cesta = NULL;
+    int i, test, dlzka_cesty, cas, *najdenaCesta = NULL;
     int n = 0, m = 0, t = 0;
     FILE *f;
     
@@ -332,7 +476,7 @@ int main() {
                 }
                 fclose(f);
                 
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             case 2://nacitanie preddefinovanej mapy n = 10;
@@ -351,7 +495,7 @@ int main() {
                 mapa[8]="CCCNNHHHHH";
                 mapa[9]="HHHPCCCCCC";
                 
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             case 3:
@@ -371,7 +515,7 @@ int main() {
                 mapa[9]="HHHPCCCCCC";
                 
                 printf("Test s drakom obkolesenym nepriechodnymi polickami\n");
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             case 4:
@@ -391,7 +535,7 @@ int main() {
                 mapa[9]="HHHPCCCCCC";
                 
                 printf("Test s drakom obkolesenym nepriechodnymi polickami\n");
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             case 5:
@@ -411,7 +555,7 @@ int main() {
                 mapa[9]="HHHPCCCCCC";
                 
                 printf("Test bez draka\n");
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             case 6:
@@ -431,7 +575,7 @@ int main() {
                 mapa[9]="HHHPCCCCCC";
                 
                 printf("Test s dvomi princeznami\n");
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             case 7:
@@ -451,36 +595,36 @@ int main() {
                 mapa[9]="HHHPCCCCCC";
                 
                 printf("Test s princeznou obkolesenou nepriechodnymi polickami\n");
-                cesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
             default:
                 continue;
         }
         
-        if(cesta != NULL){
+        if(najdenaCesta != NULL){
             cas = 0;
             for(i = 0; i < dlzka_cesty; i++){
-                printf("%d %d\n", cesta[i*2], cesta[i*2+1]);
+                printf("%d %d\n", najdenaCesta[i*2], najdenaCesta[i*2+1]);
                 
-                if(mapa[cesta[i*2+1]][cesta[i*2]] == 'H')
+                if(mapa[najdenaCesta[i*2+1]][najdenaCesta[i*2]] == 'H')
                     cas += 2;
                 else
                     cas += 1;
                 
-                if(mapa[cesta[i*2+1]][cesta[i*2]] == 'D' && cas > t)
+                if(mapa[najdenaCesta[i*2+1]][najdenaCesta[i*2]] == 'D' && cas > t)
                     printf("Nestihol si zabit draka!\n");
                 
-                if(mapa[cesta[i*2+1]][cesta[i*2]] == 'N')
+                if(mapa[najdenaCesta[i*2+1]][najdenaCesta[i*2]] == 'N')
                     printf("Prechod cez nepriechodnu prekazku!\n");
                 
-                if(i > 0 && abs(cesta[i*2+1] - cesta[(i-1)*2+1]) + abs(cesta[i*2] - cesta[(i-1)*2]) > 1)
+                if(i > 0 && abs(najdenaCesta[i*2+1] - najdenaCesta[(i-1)*2+1]) + abs(najdenaCesta[i*2] - najdenaCesta[(i-1)*2]) > 1)
                     printf("Neplatny posun Popolvara!\n");
             }
             
             printf("Dlzka cesty: %d\n\n", cas);
         }
-        free(cesta);
+        free(najdenaCesta);
     }
     return 0;
 }

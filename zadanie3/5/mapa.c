@@ -13,7 +13,7 @@ static int N;
 static int M;
 static int size;
 
-char **set(char mapa[N][M]){
+static char **set(char mapa[N][M]){
     char **pom = (char **) malloc(N * sizeof(char *));
     for(int i = 0; i < N; i++){
         *pom = (char *) malloc(M * sizeof(char));
