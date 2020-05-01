@@ -2,8 +2,6 @@
 
 This is a project for 2nd semester class "Data Structures and Algorithms". Projects is about working with dynamic memory allocation.
 
-List of functions that need to be made:
-
 **memory_init() (initialization of memory):**
  - [x] redirect global pointer to array representing memory
  - [x] allocate head and foot of memory
