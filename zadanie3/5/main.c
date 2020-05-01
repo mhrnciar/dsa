@@ -126,8 +126,6 @@ void dijkstra(int n, int m, int pocetP){
     front = NULL;
     front = malloc(sizeof(FRONT));
     front->mapa = malloc(sizeof(MAPY));
-    front->mapa->mapa = mapy[0].mapa;
-    front->mapa->nazov = mapy[1].nazov;
     front->cesta = (CESTA *) malloc(sizeof(CESTA));
     front->cesta->a = a;
     front->cesta->b = b;
@@ -136,10 +134,26 @@ void dijkstra(int n, int m, int pocetP){
     front->next = NULL;
     front->mrtvyDrak = 0;
     front->pocetP = pocetP;
+    front->mapa->mapa = mapy[0].mapa;
+    if(pocetP != 0)
+        front->mapa->nazov = mapy[1].nazov;
+    else
+        front->mapa->nazov = mapy[0].nazov;
     
     string = malloc(pocetP * sizeof(char));
     
     while(front != NULL){
+        if(cesta != NULL){
+            while(front != NULL && front->len > cesta->len){
+                temp = front;
+                front = front->next;
+                free(temp);
+            }
+            if(front == NULL){
+                return;
+            }
+        }
+        
         for(int i = 0; i < n; i++){
             for(int j = 0; j < m; j++){
                 navstivene[i][j] = front->mapa->mapa[i][j];
@@ -174,6 +188,7 @@ void dijkstra(int n, int m, int pocetP){
         if((pocetP == 0) && (mapy[0].mapa[a][b] == 'D')){
             ulozCestu(front);
             free(front);
+            front = NULL;
             return;
         }
         else if(pocetP == 1){
@@ -762,7 +777,7 @@ int main() {
     
     while(1){
         printf("Zadajte cislo testu:\n0: Ukoncenie programu\n");
-        printf("1: Nacitanie testu zo suboru \n2: Jedna princezna \n3: Dve princezne \n4: Tri princezne \n5: Styri princezne \n6: Pat princezien \n7: Testy s neriesitelnym problemom\n");
+        printf("1: Nacitanie testu zo suboru \n2-6: Validne vstupy \n7: Testy s neriesitelnym problemom\n");
         scanf("%d", &test);
         dlzka_cesty = 0;
         n = m = t = 0;
@@ -893,13 +908,13 @@ int main() {
                 mapa[2]="DNCCNNHHHC";
                 mapa[3]="CHHHCCCCCC";
                 mapa[4]="NCCCCNHHHH";
-                mapa[5]="PNHCCCNNNN";
+                mapa[5]="NNHCCCNNNN";
                 mapa[6]="NNNNNHCCCC";
-                mapa[7]="CCCCCPCCCC";
+                mapa[7]="CCCCCHCCCC";
                 mapa[8]="CCCNNHHHHH";
-                mapa[9]="HHHPCCCCCC";
+                mapa[9]="HHHCCCCCCC";
                 
-                printf("Test s princeznou obkolesenou nepriechodnymi polickami\n");
+                printf("Test bez princezien\n");
                 najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
@@ -936,4 +951,3 @@ int main() {
     }
     return 0;
 }
-
