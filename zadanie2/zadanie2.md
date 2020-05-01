@@ -1,4 +1,4 @@
-## dsa-projekt1
+## dsa-projekt2
 
 This is a project for 2nd semester class "Data Structures and Algorithms". Projects is about working with data structures.
 
