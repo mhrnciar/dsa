@@ -26,6 +26,13 @@ static char **set(char mapa[N][M]){
     return pom;
 }
 
+/*
+ * Funkcia createMaps vytvara pole map, ktore sa pouziju pri hladani najkratsej cesty. Staci 2^n map,
+ * kde n je pocet princezien, teda najviac je potrebne 32 map (Jedna mapa s drakom, s ktorou sa zacina,
+ * 32 - 1 map s roznymi kombinaciami vyskytu princezien - mapa so vsetkymi princeznami najdenymi nie je
+ * potrebna). Mapy su oznacene podla najdenych princezien, teda napr. mapa so vsetkymi princeznami je
+ * oznacena 'nnnnn', mapa s najdenou 1. a 3. princeznou je oznacena 'pnpnn' a pod.
+ */
 MAPY *createMaps(char **mapa, int n, int m){
     N = n;
     M = m;
@@ -324,6 +331,7 @@ MAPY *createMaps(char **mapa, int n, int m){
     return mapy;
 }
 
+// DEBUG
 void print(MAPY *mapy, int n, int m){
     for(int i = 0; i < size; i++){
         printf("%s\n", mapy[i].nazov);

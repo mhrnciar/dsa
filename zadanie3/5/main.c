@@ -44,6 +44,10 @@ char **setmapa(char mapa[N][M]){
     return pom;
 }
 
+/*
+ * Ak sa nasla ina cesta, zistuje sa, ci je vkladana kratsia ako tak ktora tam uz bola vlozena. Ak je kratsia,
+ * tak sa ulozi namiesto nej, v opacnom pripade sa zahodi.
+ */
 void ulozCestu(FRONT *front){
     if(cesta == NULL){
         cesta = malloc(sizeof(CESTA));
@@ -58,6 +62,14 @@ void ulozCestu(FRONT *front){
     }
 }
 
+/*
+ * Vkladanie noveho prvku do frontu - najprv sa zisti aky je teren, teda ci sa pripocita 1, 2 alebo ak ide o
+ * nepriechodnu prekazku, tak sa nezapise prvok vobec. Potom sa prekopiruju informacie z predosleho prvku ako
+ * napriklad ci uz v danej ceste bol najdeny drak alebo nejaka princezna, mapa ktora sa prave pouziva a taktiez
+ * dlzka cesty s pripocitanou vzdialenostou na policko na ktorom prave Popolvar stoji. Nasledne sa prejde spajany
+ * zoznam a zisti sa ci do daneho policka uz nevedie ina, dlhsia cesta. V tom pripade by sa nova cesta zapisala
+ * namiesto nej. Nakoniec sa pole automaticky postupne zoraduje podla dlzky doposial vytvorenej cesty.
+ */
 void addToFront(FRONT **front, char **navstivene, int a, int b){
     FRONT *akt = *front, *new = NULL;
     int move;
@@ -117,13 +129,10 @@ void dijkstra(int n, int m, int pocetP){
     
     cesta = NULL;
     
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < m; j++){
-            navstivene[i][j] = '0';
-        }
-    }
-    
-    front = NULL;
+    /*
+     * Vytvori sa prvy prvok vo fronte s mapou s drakom aj princeznami, zapise sa pocet princezien a
+     * informacia o tom, ze drak este nie je mrtvy, ako aj cesta, ktora ukazuje na policko [0,0].
+     */
     front = malloc(sizeof(FRONT));
     front->mapa = malloc(sizeof(MAPY));
     front->cesta = (CESTA *) malloc(sizeof(CESTA));
@@ -142,6 +151,13 @@ void dijkstra(int n, int m, int pocetP){
     
     string = malloc(pocetP * sizeof(char));
     
+    /*
+     * Funkcia bezi az kym sa nevyprazdni cely front. Vzdy sa na zaciatku skontroluje ci cesta vo
+     * fronte uz nie je dlhsia ako ta, ktora uz bola zapisana. V tom pripade uz nehrozi, ze by sa
+     * mohla zapisat a rovno sa vyhodi. Potom sa stiahne mapa prvku (ine prvky mozu mat ine mapy,
+     * napr. ked v jednom sa drak uz nasiel, zatial co v druhom sa este stale hlada) a miesto na
+     * mape, kde prave Popolvar stoji sa zmeni na '0', co naznacuje ze dane policko uz bolo navstivene.
+     */
     while(front != NULL){
         if(cesta != NULL){
             while(front != NULL && front->len > cesta->len){
@@ -185,6 +201,12 @@ void dijkstra(int n, int m, int pocetP){
         b = front->cesta->b;
         navstivene[a][b] = '0';
         
+        /*
+         * Prebehne kontrola, ci Popolvar nestoji na policku s drakom alebo s princeznou, podla
+         * toho sa do prvku frontu zapise nova mapa a znizi sa pocet princezien, ktore je este
+         * potrebne najst. Ak sa najde drak, tak sa v prvku oznaci ze na danej ceste bol uz drak
+         * porazeny. Ak sa najdu vsetky princezne, prejde sa k zapisovaniu cesty.
+         */
         if((pocetP == 0) && (mapy[0].mapa[a][b] == 'D')){
             ulozCestu(front);
             free(front);
@@ -228,9 +250,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden2[0] = 'p';
                 for(int i = 1; i < 4; i++){
@@ -254,9 +274,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden2[1] = 'p';
                 for(int i = 1; i < 4; i++){
@@ -278,7 +296,6 @@ void dijkstra(int n, int m, int pocetP){
             if(front->mapa->mapa[a][b] == 'D'){
                 front->mapa->nazov = mapy[1].nazov;
                 front->mapa->mapa = mapy[1].mapa;
-                iden3[0] = 'n'; iden3[1] = 'n'; iden3[2] = 'n';
                 front->mrtvyDrak = 1;
                 front->next = NULL;
                 for(int i = 0; i < n; i++){
@@ -294,9 +311,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden3[0] = 'p';
                 for(int i = 1; i < 8; i++){
@@ -320,9 +335,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden3[1] = 'p';
                 for(int i = 1; i < 8; i++){
@@ -346,9 +359,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden3[2] = 'p';
                 for(int i = 1; i < 8; i++){
@@ -370,7 +381,6 @@ void dijkstra(int n, int m, int pocetP){
             if(front->mapa->mapa[a][b] == 'D'){
                 front->mapa->nazov = mapy[1].nazov;
                 front->mapa->mapa = mapy[1].mapa;
-                iden4[0] = 'n'; iden4[1] = 'n'; iden4[2] = 'n'; iden4[3] = 'n';
                 front->mrtvyDrak = 1;
                 front->next = NULL;
                 for(int i = 0; i < n; i++){
@@ -386,9 +396,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden4[0] = 'p';
                 for(int i = 1; i < 16; i++){
@@ -412,9 +420,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden4[1] = 'p';
                 for(int i = 1; i < 16; i++){
@@ -438,9 +444,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden4[2] = 'p';
                 for(int i = 1; i < 16; i++){
@@ -464,9 +468,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden4[3] = 'p';
                 for(int i = 1; i < 16; i++){
@@ -488,7 +490,6 @@ void dijkstra(int n, int m, int pocetP){
             if(front->mapa->mapa[a][b] == 'D'){
                 front->mapa->nazov = mapy[1].nazov;
                 front->mapa->mapa = mapy[1].mapa;
-                iden5[0] = 'n'; iden5[1] = 'n'; iden5[2] = 'n'; iden5[3] = 'n'; iden5[4] = 'n';
                 front->mrtvyDrak = 1;
                 front->next = NULL;
                 for(int i = 0; i < n; i++){
@@ -504,9 +505,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden5[0] = 'p';
                 for(int i = 1; i < 32; i++){
@@ -530,9 +529,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden5[1] = 'p';
                 for(int i = 1; i < 32; i++){
@@ -556,9 +553,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden5[2] = 'p';
                 for(int i = 1; i < 32; i++){
@@ -582,9 +577,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden5[3] = 'p';
                 for(int i = 1; i < 32; i++){
@@ -608,9 +601,7 @@ void dijkstra(int n, int m, int pocetP){
                     temp = front;
                     front = front->next;
                     free(temp);
-                }
-                if(front == NULL){
-                    return;
+                    continue;
                 }
                 iden5[4] = 'p';
                 for(int i = 1; i < 32; i++){
@@ -711,7 +702,7 @@ void dijkstra(int n, int m, int pocetP){
                 addToFront(&front, setmapa(navstivene), a, b-1);
         }
         
-        // Pociatocne policko vynecham z fronty a pokracujem dalej
+        // Pouzity prvok vyhodim z frontu a pokracujem dalej
         temp = front;
         if(front != NULL){
             front = front->next;
@@ -719,13 +710,19 @@ void dijkstra(int n, int m, int pocetP){
         }
     }
 }
-
+/*
+ * Najprv sa vytvoria mapy podla poctu princezien, a potom sa zavola funkcia dijkstra, ktora najde
+ * najkratsiu cestu. Ak sa cesta z nejakeho dovodu nenajde (napr. ked je drak obkoleseny nepriechodnymi
+ * prekazkami), tak funkcia vrati NULL. V opacnom pripade sa zisti dlzka cesty a podla nej sa vytvori
+ * pole na suradnice cesty. Tie sa do pola postupne zapisu, ale kedze sa cesta prechadza odzadu, je
+ * potrebne na konci pole este otocit. Vysledna cesta je vratena do mainu, kde sa vypise.
+ */
 int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
     int pocetP = 0;
-    mapy = createMaps(mapa, n, m);
     N = n;
     M = m;
     
+    mapy = createMaps(mapa, n, m);
     if(mapy == NULL){
         return NULL;
     }
@@ -740,7 +737,15 @@ int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty){
     
     dijkstra(n, m, pocetP);
     
+    if(cesta == NULL){
+        return NULL;
+    }
+    if(pocetP == 0){
+        printf("V mape sa nenachadza ziadna princezna - cesta vedie iba k drakovi:\n");
+    }
+    
     CESTA *akt = cesta;
+    
     while(akt != NULL){
         (*dlzka_cesty)++;
         akt = akt->prev;
@@ -777,7 +782,7 @@ int main() {
     
     while(1){
         printf("Zadajte cislo testu:\n0: Ukoncenie programu\n");
-        printf("1: Nacitanie testu zo suboru \n2-6: Validne vstupy \n7: Testy s neriesitelnym problemom\n");
+        printf("1: Nacitanie testu zo suboru \n2-6: Validne vstupy \n7-12: Chybne vstupy\n");
         scanf("%d", &test);
         dlzka_cesty = 0;
         n = m = t = 0;
@@ -871,14 +876,16 @@ int main() {
                 break;
                 
             case 5:
-                n = 4;
+                n = 6;
                 m = 8;
-                t = 2;
+                t = 10;
                 mapa = (char**) malloc(n * sizeof(char*));
-                mapa[0]="CNNNNNNN";
-                mapa[1]="DPCPCHHP";
-                mapa[2]="CNNNNNNN";
-                mapa[3]="PNNNNNNN";
+                mapa[0]="CHCCHCCD";
+                mapa[1]="NNNNCNNH";
+                mapa[2]="CCPCCNHH";
+                mapa[3]="PNNNNNNH";
+                mapa[4]="CNNHHPHC";
+                mapa[5]="HPCCHHNN";
                 
                 printf("Test so styrmi princeznami\n");
                 najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
@@ -918,6 +925,86 @@ int main() {
                 najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
                 break;
                 
+            case 8:
+                n = 6;
+                m = 8;
+                t = 10;
+                mapa = (char**) malloc(n * sizeof(char*));
+                mapa[0]="CHCCHCND";
+                mapa[1]="NNNNCNNN";
+                mapa[2]="CCPCCNHH";
+                mapa[3]="PNNNNNNH";
+                mapa[4]="CNNHHPHC";
+                mapa[5]="HPCCHHNN";
+                
+                printf("Test s nedostupnym drakom\n");
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                break;
+                
+            case 9:
+                n = 6;
+                m = 8;
+                t = 10;
+                mapa = (char**) malloc(n * sizeof(char*));
+                mapa[0]="CHCCHCCD";
+                mapa[1]="NNNNCNNN";
+                mapa[2]="CCPCCNHH";
+                mapa[3]="PNNNNNNH";
+                mapa[4]="CNNHNPNC";
+                mapa[5]="HPCCHNNN";
+                
+                printf("Test s nedostupnou princeznou\n");
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                break;
+            
+            case 10:
+                n = 6;
+                m = 8;
+                t = 10;
+                mapa = (char**) malloc(n * sizeof(char*));
+                mapa[0]="CHCCHCCC";
+                mapa[1]="NNNNCNNN";
+                mapa[2]="CCPCCNHH";
+                mapa[3]="PNNNNNNH";
+                mapa[4]="CNNHHPCC";
+                mapa[5]="HPCCHNNN";
+                
+                printf("Test bez draka\n");
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                break;
+                
+            case 11:
+                n = 6;
+                m = 8;
+                t = 10;
+                mapa = (char**) malloc(n * sizeof(char*));
+                mapa[0]="CHCCHCCD";
+                mapa[1]="NNNNCNNN";
+                mapa[2]="CCPDCNHH";
+                mapa[3]="PNNNNNNH";
+                mapa[4]="CNNHHPCC";
+                mapa[5]="HPCCHNNN";
+                
+                printf("Test s dvomi drakmi\n");
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                break;
+                
+            case 12:
+                n = 6;
+                m = 8;
+                t = 10;
+                mapa = (char**) malloc(n * sizeof(char*));
+                mapa[0]="CHCCHCCD";
+                mapa[1]="NNNNCNNN";
+                mapa[2]="CCPPCNHH";
+                mapa[3]="PNNNNNNH";
+                mapa[4]="CNNHHPCP";
+                mapa[5]="HPCCHNNN";
+                
+                printf("Test so siestimi princeznami\n");
+                najdenaCesta = zachran_princezne(mapa, n, m, t, &dlzka_cesty);
+                break;
+                
             default:
                 continue;
         }
@@ -945,7 +1032,7 @@ int main() {
             printf("Dlzka cesty: %d\n\n", cas);
         }
         else{
-            printf("Chybna cesta!");
+            printf("Chybna mapa!\n\n");
         }
         free(najdenaCesta);
     }
